@@ -72,6 +72,7 @@ namespace 获取壁纸
         private DirectoryInfo MaindirectoryInfo;
         private TextBox AllCoutns, DoneCouts, copyCounts;
         private String destinDirect;
+        private Action<String> AllCoutnsDelegate, DoneCoutsDelegate, copyCountsDelegate;
 
         public CopyFileInThread(DirectoryInfo directoryInfo, string destinDirect, TextBox doneCouts, TextBox copyCounts, TextBox allCoutns)
         {
@@ -80,15 +81,20 @@ namespace 获取壁纸
             DoneCouts = doneCouts;
             this.copyCounts = copyCounts;
             AllCoutns = allCoutns;
+           AllCoutnsDelegate = delegate (string n) { AllCoutns.Text = n; };
+           DoneCoutsDelegate = delegate (string n) { DoneCouts.Text = n; };
+            copyCountsDelegate = delegate (string n) { copyCounts.Text = n; };
         }
 
         public void DOAll()
         {
-            AllCoutns.Text = "0";
-            DoneCouts.Text = "0";
-            copyCounts.Text = "0";
+            AllCoutns.Invoke(AllCoutnsDelegate, new object[] { "0" });
+            DoneCouts.Invoke(DoneCoutsDelegate, new object[] { "0" });
+            copyCounts.Invoke(copyCountsDelegate, new object[] { "0" });
+
+          
             var fileInfos = getAllFiles(MaindirectoryInfo);
-            AllCoutns.Text = fileInfos.Count().ToString();
+            AllCoutns.Invoke(AllCoutnsDelegate, new object[] { fileInfos.Count().ToString() });
             DoCopy(fileInfos);
             MessageBoxButtons buttons = MessageBoxButtons.OK;
             MessageBoxIcon icon = MessageBoxIcon.Information;
@@ -114,10 +120,11 @@ namespace 获取壁纸
             foreach (FileInfo fi in fileNames)
             {
                 Done++;
-                DoneCouts.Text = Done.ToString();
+                //DoneCouts.Text = Done.ToString();
+                DoneCouts.Invoke(DoneCoutsDelegate, new object[] { Done.ToString() });
 
-                //排除小于180K或者大于50M的文件
-                if (fi.Length < 180 * 1024 && fi.Length > 50 * 1024 * 1024)
+                //排除小于150K或者大于50M的文件
+                if (fi.Length < 150 * 1024 && fi.Length > 50 * 1024 * 1024)
                 {
                     continue;
                 }
@@ -146,7 +153,7 @@ namespace 获取壁纸
 
 
 
-                if (Width > (Height * 1.6) && Width >= 1300 && Height >= 900)
+                if (Width > (Height * 1.32) && Width >= 1300 && Height >= 900)
                 {
 
                     if (fi.DirectoryName != null && destinDirect != null)
@@ -173,7 +180,8 @@ namespace 获取壁纸
 
                         }
                         copy++;
-                        copyCounts.Text = copy.ToString();
+                      
+                        copyCounts.Invoke(copyCountsDelegate, new object[] { copy.ToString() });
                     }
 
                 }
@@ -203,7 +211,7 @@ namespace 获取壁纸
 
                 //        }
                 //        copy++;
-                //        copyCounts.Text = copy.ToString();
+                //       copyCounts.Invoke(copyCountsDelegate, new object[] { copy.ToString() });
                 //    }
                 //}
 
